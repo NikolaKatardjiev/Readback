@@ -1,10 +1,10 @@
-# quiz-app — agent guide
+# Readback — agent guide
 
-A small self-hosted web app that generates **comprehension quizzes about code
+Readback is a small self-hosted web app that generates **comprehension quizzes about code
 in targeted Git repositories**, using an LLM API key supplied by the user.
 Purpose: help the owner actually understand code that was "vibe coded".
 
-This is a **standalone project** (public GitHub repo). It is deployed on the
+This is a **standalone project** (public GitHub repo: github.com/NikolaKatardjiev/Readback). It is deployed on the
 owner's homelab, but the homelab repo (`home-server`, GitLab) only references
 the published image — no app code lives there.
 
@@ -28,22 +28,22 @@ the published image — no app code lives there.
 - Never commit secrets; provide `.env.example` only.
 
 ## Delivery plan
-1. **MVP first**: a CLI/script — `quiz <repo> <mr|range|path>` → Markdown quiz
+1. **MVP first**: a CLI/script — `readback <repo> <mr|range|path>` → Markdown quiz
    with answer key and `file:line` citations. Use it for a while.
 2. Then wrap it in a small web UI (stack TBD — keep it simple).
 3. Containerize; one image, configured via env vars, with a healthcheck.
 
 ## Release & deploy contract (with `home-server`)
 - GitHub Actions builds on semver tag `vX.Y.Z` and pushes
-  `ghcr.io/<owner>/quiz:X.Y.Z` (no reliance on `latest`).
+  `ghcr.io/nikolakatardjiev/readback:X.Y.Z` (no reliance on `latest`).
 - After publishing, the workflow calls a **GitLab pipeline trigger**
   (scoped trigger token stored as a GitHub secret) which opens an MR in
   `home-server` bumping the pinned tag. Git stays the source of truth —
   **no Watchtower-style auto-pulling**.
 - Document the contract in `README.md` and keep it current:
   image name, tag format, listening port, env vars, healthcheck path.
-- `home-server` will contain only `compose/quiz/compose.yaml` (Traefik labels,
-  external `proxy` network) and `docs/quiz.md`.
+- `home-server` will contain only `compose/readback/compose.yaml` (Traefik labels,
+  external `proxy` network) and `docs/readback.md`.
 
 ## When editing
 - Keep `README.md` (incl. the deploy contract) current with behavior.
