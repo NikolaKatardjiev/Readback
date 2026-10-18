@@ -9,8 +9,13 @@ owner's homelab, but the homelab repo (`home-server`, GitLab) only references
 the published image — no app code lives there.
 
 ## Product decisions (agreed)
-- **Scope quizzes narrowly**: a merge request / PR, a commit range, or a path
-  (file/folder) — never "the whole repo". Cheaper and sharper questions.
+- **Scope quizzes narrowly**: a commit range or a path (file/folder) — never
+  "the whole repo". Cheaper and sharper questions. MR/PR targets are deferred
+  (user fetches the ref and passes a range).
+- **Multiple choice, learning not exam**: one LLM call generates questions,
+  options and answer key; taking a quiz needs no LLM. User writes their own
+  answer before seeing options, then self-grades.
+- Full CLI MVP design: `docs/design.md`.
 - **Grounded answers**: every question cites `file:line-range` so the answer
   can be verified against source, not trusted blindly.
 - Question mix: "what happens if X fails", "why is this needed",
@@ -21,15 +26,17 @@ the published image — no app code lives there.
 - **BYO AI key stays client-side**: held in the browser, sent per request,
   **never persisted** server-side or logged. If persistence is ever added,
   it must be encrypted at rest — treat as a design change.
-- Repo access uses a **read-only, narrowly scoped token**
-  (e.g. GitLab `read_repository` on specific projects / GitHub fine-grained
-  read-only). Never full-account tokens.
+- **Readback is not responsible for repo access**: it reads local clones the
+  user can already read, using read-only local git commands only. The only
+  secret it handles is the user's LLM key. (How the web phase gets repo
+  content is undecided.)
 - The app is **not public**: LAN/VPN only or behind auth at the reverse proxy.
 - Never commit secrets; provide `.env.example` only.
 
 ## Delivery plan
-1. **MVP first**: a CLI/script — `readback <repo> <mr|range|path>` → Markdown quiz
-   with answer key and `file:line` citations. Use it for a while.
+1. **MVP first**: a TypeScript CLI — `readback generate <repo> <range|path:…>`
+   → `quiz.json` (+ Markdown views) with `file:line` citations, and
+   `readback take quiz.json` for interactive self-grading. Use it for a while.
 2. Then wrap it in a small web UI (stack TBD — keep it simple).
 3. Containerize; one image, configured via env vars, with a healthcheck.
 
